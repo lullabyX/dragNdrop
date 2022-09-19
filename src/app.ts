@@ -46,26 +46,39 @@ function Validator(obj: ValidateObj) {
 }
 
 // // Project List Class
-// class ProjectList {
-//   hostElement: HTMLDivElement;
-//   projectListTemplateElement: HTMLTemplateElement;
-//   element: HTMLElement;
+class ProjectList {
+  hostElement: HTMLDivElement;
+  projectListTemplateElement: HTMLTemplateElement;
+  element: HTMLElement;
 
-//   constructor (private type: 'active' | 'finished') {
-//     this.hostElement = document.getElementById('app') as HTMLDivElement;
-//     this.projectListTemplateElement = document.getElementById('project-list') as HTMLTemplateElement;
-//     const insertNode = document.importNode(this.projectListTemplateElement, true);
+  constructor(private type: "active" | "finished") {
+    this.hostElement = document.getElementById("app") as HTMLDivElement;
+    this.projectListTemplateElement = document.getElementById(
+      "project-list"
+    ) as HTMLTemplateElement;
+    const insertNode = document.importNode(
+      this.projectListTemplateElement.content,
+      true
+    );
 
-//     this.element = insertNode.firstElementChild as HTMLElement
+    this.element = insertNode.firstElementChild as HTMLElement;
+    this.element.setAttribute("id", `${this.type}-projects`);
 
-//     this.attach()
+    this.renderContent();
+    this.attach();
+  }
 
-//   }
-
-//   private attach() {
-//     this.hostElement.insertAdjacentElement('beforeend', this.element)
-//   }
-// }
+  private renderContent() {
+    const listId = Math.random().toString();
+    this.element.querySelector("ul")!.id = listId;
+    this.element.querySelector(
+      "h2"
+    )!.textContent = `${this.type.toUpperCase()} PROJECTS`;
+  }
+  private attach() {
+    this.hostElement.insertAdjacentElement("beforeend", this.element);
+  }
+}
 
 // Project Input Class
 class ProjectInput {
@@ -103,7 +116,7 @@ class ProjectInput {
     this.attach();
   }
 
-  addProject() {
+  gatherUserInput() {
     const title = this.titleInputElement.value;
     const description = this.descriptionInputElement.value;
     const people = +this.peopleInputElement.value;
@@ -138,7 +151,7 @@ class ProjectInput {
   @Autobind
   private submitHandler(event: Event) {
     event.preventDefault();
-    this.addProject()
+    this.gatherUserInput();
   }
 
   private configure() {
@@ -151,3 +164,6 @@ class ProjectInput {
 }
 
 const project = new ProjectInput();
+
+const activePrjList = new ProjectList("active");
+const finishedPrjList = new ProjectList("finished");
