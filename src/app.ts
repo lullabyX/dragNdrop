@@ -45,11 +45,60 @@ function Validator(obj: ValidateObj) {
   return isValid;
 }
 
-// // Project List Class
+// Project type
+enum ProjectType {
+  ACTIVE,
+  FINISHED,
+}
+
+// Project Class
+class Project {
+  constructor(
+    public title: string,
+    public description: string,
+    public people: number,
+    public type: ProjectType
+  ) {}
+}
+
+type ListenerFn = (items: Project[]) => void;
+
+// Project State Class
+class ProjectState {
+  private projectList: Project[] = [];
+  private listeners: any[] = [];
+  static instance: ProjectState;
+
+  private constructor() {}
+
+  static getInstance() {
+    if (this.instance) {
+      return this.instance;
+    }
+    this.instance = new ProjectState();
+    return this.instance;
+  }
+
+  addProject(project: Project) {
+    this.projectList.push(project);
+    for (const listener of this.listeners) {
+      listener(this.projectList.slice());
+    }
+  }
+
+  addListener(listener: ListenerFn) {
+    this.listeners.push(listener);
+  }
+}
+
+const projectState = ProjectState.getInstance();
+
+// Project List Class
 class ProjectList {
   hostElement: HTMLDivElement;
   projectListTemplateElement: HTMLTemplateElement;
   element: HTMLElement;
+  receivedList: Project[] = []
 
   constructor(private type: "active" | "finished") {
     this.hostElement = document.getElementById("app") as HTMLDivElement;
@@ -64,12 +113,36 @@ class ProjectList {
     this.element = insertNode.firstElementChild as HTMLElement;
     this.element.setAttribute("id", `${this.type}-projects`);
 
+    projectState.addListener(this.renderList);
     this.renderContent();
     this.attach();
   }
 
+  @Autobind
+  private renderList(projects: Project[]) {
+    const listEl = document.getElementById(`${this.type}-project-list`) as HTMLUListElement
+    listEl.innerHTML = ''
+
+    for (const project of projects)
+    {
+      if (this.type === 'active' && project.type === ProjectType.ACTIVE)
+      {
+        const listItem = document.createElement("li")!;
+        listItem.textContent = project.title;
+        listEl.appendChild(listItem);
+      } 
+
+      if (this.type === "finished" && project.type === ProjectType.FINISHED) {
+        const listItem = document.createElement("li")!;
+        listItem.textContent = project.title;
+        listEl.appendChild(listItem);
+      } 
+      
+    }
+  }
+
   private renderContent() {
-    const listId = Math.random().toString();
+    const listId = `${this.type}-project-list`
     this.element.querySelector("ul")!.id = listId;
     this.element.querySelector(
       "h2"
@@ -143,6 +216,13 @@ class ProjectInput {
       Validator(peopleValidation)
     ) {
       console.log(title, description, people);
+      const project = new Project(
+        title,
+        description,
+        people,
+        ProjectType.ACTIVE
+      );
+      projectState.addProject(project);
     } else {
       alert("Validation Failed");
     }
