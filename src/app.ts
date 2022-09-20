@@ -186,7 +186,7 @@ class ProjectItem
   @Autobind
   dragStart(event: DragEvent): void {
     event.dataTransfer!.setData("text/plain", this.project.id);
-    event.dataTransfer!.dropEffect = 'move'
+    event.dataTransfer!.dropEffect = "move";
   }
 
   @Autobind
@@ -223,8 +223,8 @@ class ProjectList
   @Autobind
   dragOver(event: DragEvent): void {
     event?.preventDefault();
-    if (event.dataTransfer && event.dataTransfer.types[0]=== "text/plain") {
-      const listEl = this.element.querySelector('ul')!;
+    if (event.dataTransfer && event.dataTransfer.types[0] === "text/plain") {
+      const listEl = this.element.querySelector("ul")!;
       listEl.classList.add("droppable");
     }
   }
@@ -232,9 +232,10 @@ class ProjectList
   @Autobind
   dragLeave(event: DragEvent): void {
     console.log(event);
-    
-    const listEl = this.element.querySelector('ul')!;
-    listEl.classList.remove("droppable");
+    if (event.relatedTarget === document.getElementById('app')) {
+      const listEl = this.element.querySelector("ul")!;
+      listEl.classList.remove("droppable");
+    }
   }
 
   @Autobind
